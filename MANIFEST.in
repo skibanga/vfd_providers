@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include vfd_providers *.css
+recursive-include vfd_providers *.csv
+recursive-include vfd_providers *.html
+recursive-include vfd_providers *.ico
+recursive-include vfd_providers *.js
+recursive-include vfd_providers *.json
+recursive-include vfd_providers *.md
+recursive-include vfd_providers *.png
+recursive-include vfd_providers *.py
+recursive-include vfd_providers *.svg
+recursive-include vfd_providers *.txt
+recursive-exclude vfd_providers *.pyc
