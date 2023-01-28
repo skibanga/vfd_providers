@@ -1,3 +1,4 @@
+LICENSE
 MANIFEST.in
 README.md
 license.txt
@@ -15,6 +16,5 @@ vfd_providers.egg-info/top_level.txt
 vfd_providers/config/__init__.py
 vfd_providers/config/desktop.py
 vfd_providers/config/docs.py
-vfd_providers/templates/__init__.py
 vfd_providers/templates/pages/__init__.py
 vfd_providers/vfd_providers/__init__.py

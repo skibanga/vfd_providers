@@ -1,0 +1,203 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:company",
+ "creation": "2023-01-28 23:00:15.714571",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "serial_id",
+  "serial_code",
+  "account_id",
+  "company_name",
+  "alias_name",
+  "env",
+  "tin",
+  "vrn",
+  "serial",
+  "uin",
+  "mobile",
+  "address",
+  "city",
+  "region",
+  "street",
+  "taxoffice",
+  "token_ackmsg",
+  "vat_enabled",
+  "gc",
+  "dev_type",
+  "gov_reg_sdate",
+  "gov_reg_edate"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "serial_id",
+   "fieldtype": "Data",
+   "label": "Serial ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_code",
+   "fieldtype": "Data",
+   "label": "Serial Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "account_id",
+   "fieldtype": "Data",
+   "label": "Account ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alias_name",
+   "fieldtype": "Data",
+   "label": "Alias Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "env",
+   "fieldtype": "Data",
+   "label": "Env",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tin",
+   "fieldtype": "Data",
+   "label": "TIN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vrn",
+   "fieldtype": "Data",
+   "label": "VRN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial",
+   "fieldtype": "Data",
+   "label": "Serial",
+   "read_only": 1
+  },
+  {
+   "fieldname": "uin",
+   "fieldtype": "Data",
+   "label": "UIN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mobile",
+   "fieldtype": "Data",
+   "label": "Mobile",
+   "read_only": 1
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "label": "Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "read_only": 1
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Data",
+   "label": "Region",
+   "read_only": 1
+  },
+  {
+   "fieldname": "street",
+   "fieldtype": "Data",
+   "label": "Street",
+   "read_only": 1
+  },
+  {
+   "fieldname": "taxoffice",
+   "fieldtype": "Data",
+   "label": "TaxOffice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "token_ackmsg",
+   "fieldtype": "Data",
+   "label": "Token AckMsg",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "vat_enabled",
+   "fieldtype": "Check",
+   "label": "VAT Enabled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gc",
+   "fieldtype": "Int",
+   "label": "GC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dev_type",
+   "fieldtype": "Data",
+   "label": "Dev Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gov_reg_sdate",
+   "fieldtype": "Date",
+   "label": "Gov Reg SDate"
+  },
+  {
+   "fieldname": "gov_reg_edate",
+   "fieldtype": "Date",
+   "label": "Gov Reg EDate",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2023-01-28 23:04:16.543098",
+ "modified_by": "Administrator",
+ "module": "VFD Settings",
+ "name": "VFDPlus Settings",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "read_only": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
