@@ -7,12 +7,12 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 def make_custom_fields():
     create_custom_fields(
         {
-            "Web Form": [
+            "Sales Invoice": [
                 {
-                    "fieldname": "payments_tab",
-                    "fieldtype": "Tab Break",
-                    "label": "Payments",
-                    "insert_after": "custom_css",
+                    "default": "0",
+                    "fieldname": "is_not_vfd_invoice",
+                    "fieldtype": "Check",
+                    "label": "Is Not VFD Invoice",
                 },
                 {
                     "default": "0",
@@ -87,13 +87,10 @@ def make_custom_fields():
 
 
 @frappe.whitelist()
-def generate_tra_vfd(docname):
-    sinv_doc = frappe.get_doc("Sales Invoice", docname)
-    if (
-        sinv_doc.is_not_vfd_invoice
-        or sinv_doc.do_not_send_vfd
-        or sinv_doc.vfd_status == "Sent"
-    ):
+def generate_tra_vfd(docname, sinv_doc=None):
+    if not sinv_doc:
+        sinv_doc = frappe.get_doc("Sales Invoice", docname)
+    if sinv_doc.is_not_vfd_invoice or sinv_doc.vfd_status == "Sent":
         return
     comp_vfd_provider = frappe.get_doc(
         "Company VFD Provider", filters={"name": sinv_doc.company}
@@ -110,11 +107,14 @@ def generate_tra_vfd(docname):
     )
     if not vfd_provider_settings:
         return
-    vfd_provider_settings.send_vfd_request(doc=sinv_doc, method="validate")
+    if vfd_provider_settings.vfd_provider == "VFDPlus":
+        from vfd_providers.vfd_providers.doctype.vfdplus_settings.vfdplus_settings import post_fiscal_receipt
+
+        post_fiscal_receipt(sinv_doc)
 
 
 def autogenerate_vfd(doc, method):
-    if doc.is_not_vfd_invoice or doc.do_not_send_vfd or doc.vfd_status == "Sent":
+    if doc.is_not_vfd_invoice or doc.vfd_status == "Sent":
         return
-    if doc.docstatus == 1:
-        generate_tra_vfd(docname=doc.name)
+    if doc.is_auto_generate_vfd and doc.docstatus == 1:
+        generate_tra_vfd(docname=doc.name, sinv_doc=doc)

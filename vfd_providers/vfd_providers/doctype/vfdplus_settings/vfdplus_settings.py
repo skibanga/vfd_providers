@@ -13,6 +13,7 @@ class VFDPlusSettings(Document):
         get_serial_info(self, method="validate")
 
 
+# Below are the status codes returned by VFDPlus API
 vfdplus_status_codes = {
     "4000": "VFDPLUS-API-KEY not found in header!",
     "4001": "Invalid VFDPLUS-API-KEY!",
@@ -35,6 +36,23 @@ vfdplus_status_codes = {
 
 
 def send_vfdplus_request(call_type, company, payload=None, type="GET"):
+    """Send request to VFDPlus API
+    Parameters
+    ----------
+    call_type : str
+    Type of call to make. e.g. "get_serial_info", "post_fiscal_receipt", "account_info", etc.
+    company : str
+    Company to get VFDPlus settings from
+    payload : dict
+    Payload to send to VFDPlus API
+    type : str
+    Type of request to make. e.g. "GET", "POST", "PUT", etc.
+
+    Returns
+    -------
+    data : dict
+    Dictionary with response from VFDPlus API
+    """
     vfdplus = frappe.get_cached_doc("VFD Provider", "VFDPlus")
     vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", company)
     url = (
@@ -86,10 +104,109 @@ def send_vfdplus_request(call_type, company, payload=None, type="GET"):
 
 
 def post_fiscal_receipt(doc):
+    """Post fiscal receipt to VFDPlus
+    Parameters
+    ----------
+    doc : object
+    Python object which is expected to be from VFDPlus Settings doctype.
+
+    Returns
+    -------
+    Nothing
+    """
+    vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", doc.company)
+
+    cart_items = []
+    for item in doc.items:
+        vat_rate_code, vat_rate_id = get_vat_rate_code(item.item_tax_template)
+        cart_items.append({
+                "vat_rate_code": vat_rate_code,
+                "vat_rate_id": vat_rate_id,
+                "item_name": item.item_code,
+                "item_barcode": "-1",
+                "item_qty": item.qty,
+                "usp": item.base_net_rate,
+                "sp": item.base_net_amount,
+                "unit_discount_perc": 0.0,
+                "unit_discount_amt": 0.0,
+                "total_item_discount": 0.0
+            }
+        )
+
+    payload = {
+        "credential_code": vfdplus_settings.company,
+        "branch_id": "",
+        "depart_id": "",
+        "trans_no": doc.name,
+        "idate": doc.vfd_date,
+        "itime": doc.vfd_time,
+        "customer_info": {
+            "cust_name": doc.customer_name,
+            "cust_id_type": doc.vfd_cust_id_type,
+            "cust_id": doc.vfd_cust_id,
+            "cust_phone": "",
+            "cust_vrn": "",
+            "cust_addr": "",
+            "id_for": "",
+        },
+        "payment_methods": [
+            {
+                "pmt_type": "INVOICE",
+                "pmt_amount": doc.base_rounded_total or doc.base_grand_total,
+            }
+        ],
+        "cart_totals": {
+            "item_counts": len(doc.items),
+            "total_amount": doc.base_rounded_total or doc.base_grand_total,
+            "total_amount_exclude_discount": doc.base_rounded_total
+            or doc.base_grand_total,
+            "discount": 0.0,
+        },
+        "cart_items": [
+            {
+                "vat_rate_code": "A",
+                "vat_rate_id": 1,
+                "item_name": "VITUMBUA",
+                "item_barcode": "-1",
+                "item_qty": 10.0,
+                "usp": 1000.0,
+                "sp": 1000.0,
+                "unit_discount_perc": 0.0,
+                "unit_discount_amt": 0.0,
+                "total_item_discount": 0.0,
+            }
+        ],
+        "user_info": {
+            "user_id": "1",
+            "username": doc.modified_by.split("@")[0],
+            "till_id": "1",
+        },
+    }
+
+    data = send_vfdplus_request("post_fiscal_receipt", doc.company, payload, "POST")
+
+    doc.vfd_rctvnum = data.get("rctvnum")
+    doc.vfd_verification_url = (
+        f"https://virtual.tra.go.tz/efdmsRctVerify/{data.get('rctvnum')}_{doc.vfd_time}"
+    )
+    doc.save()
+    frappe.db.commit()
     return
 
 
 def get_serial_info(doc, method):
+    """Get serial info from VFDPlus
+    Parameters
+    ----------
+    doc : object
+    Python object which is expected to be from VFDPlus Settings doctype.
+    method : str
+    Method name which is calling this function. e.g. validate, on_update, etc.
+
+    Returns
+    -------
+    Nothing
+    """
     data = send_vfdplus_request(
         call_type="serial_info", company=doc.company, type="GET"
     )
@@ -109,6 +226,17 @@ def get_serial_info(doc, method):
 
 @frappe.whitelist()
 def get_account_info(company):
+    """Get serial info from VFDPlus
+    Parameters
+    ----------
+    company : str
+    String having Company name
+
+    Returns
+    -------
+    data : dict
+    Dictionary of account info
+    """
     # TODO
     data = send_vfdplus_request(call_type="account_info", company=company, type="GET")
     if data:
