@@ -42,7 +42,7 @@ app_license = "GPL"
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }
 
 # Generators
@@ -56,8 +56,8 @@ app_license = "GPL"
 
 # add methods and filters to jinja environment
 # jinja = {
-#	"methods": "vfd_providers.utils.jinja_methods",
-#	"filters": "vfd_providers.utils.jinja_filters"
+# 	"methods": "vfd_providers.utils.jinja_methods",
+# 	"filters": "vfd_providers.utils.jinja_filters"
 # }
 
 # Installation
@@ -83,11 +83,11 @@ app_license = "GPL"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-#	"Event": "frappe.desk.doctype.event.event.has_permission",
+# 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
@@ -95,7 +95,7 @@ app_license = "GPL"
 # Override standard doctype classes
 
 # override_doctype_class = {
-#	"ToDo": "custom_app.overrides.CustomToDo"
+# 	"ToDo": "custom_app.overrides.CustomToDo"
 # }
 
 # Document Events
@@ -103,32 +103,33 @@ app_license = "GPL"
 # Hook on document methods and events
 
 # doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
+# 	"*": {
+# 		"on_update": "method",
+# 		"on_cancel": "method",
+# 		"on_trash": "method"
+# 	}
 # }
+doc_events = {"Sales Invoice": {"on_submit": "vfd_providers.utils.autogenerate_vfd"}}
 
 # Scheduled Tasks
 # ---------------
 
 # scheduler_events = {
-#	"all": [
-#		"vfd_providers.tasks.all"
-#	],
-#	"daily": [
-#		"vfd_providers.tasks.daily"
-#	],
-#	"hourly": [
-#		"vfd_providers.tasks.hourly"
-#	],
-#	"weekly": [
-#		"vfd_providers.tasks.weekly"
-#	],
-#	"monthly": [
-#		"vfd_providers.tasks.monthly"
-#	],
+# 	"all": [
+# 		"vfd_providers.tasks.all"
+# 	],
+# 	"daily": [
+# 		"vfd_providers.tasks.daily"
+# 	],
+# 	"hourly": [
+# 		"vfd_providers.tasks.hourly"
+# 	],
+# 	"weekly": [
+# 		"vfd_providers.tasks.weekly"
+# 	],
+# 	"monthly": [
+# 		"vfd_providers.tasks.monthly"
+# 	],
 # }
 
 # Testing
@@ -140,14 +141,14 @@ app_license = "GPL"
 # ------------------------------
 #
 # override_whitelisted_methods = {
-#	"frappe.desk.doctype.event.event.get_events": "vfd_providers.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "vfd_providers.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-#	"Task": "vfd_providers.task.get_dashboard_data"
+# 	"Task": "vfd_providers.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -164,29 +165,29 @@ app_license = "GPL"
 # --------------------
 
 # user_data_fields = [
-#	{
-#		"doctype": "{doctype_1}",
-#		"filter_by": "{filter_by}",
-#		"redact_fields": ["{field_1}", "{field_2}"],
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_2}",
-#		"filter_by": "{filter_by}",
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_3}",
-#		"strict": False,
-#	},
-#	{
-#		"doctype": "{doctype_4}"
-#	}
+# 	{
+# 		"doctype": "{doctype_1}",
+# 		"filter_by": "{filter_by}",
+# 		"redact_fields": ["{field_1}", "{field_2}"],
+# 		"partial": 1,
+# 	},
+# 	{
+# 		"doctype": "{doctype_2}",
+# 		"filter_by": "{filter_by}",
+# 		"partial": 1,
+# 	},
+# 	{
+# 		"doctype": "{doctype_3}",
+# 		"strict": False,
+# 	},
+# 	{
+# 		"doctype": "{doctype_4}"
+# 	}
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-#	"vfd_providers.auth.validate"
+# 	"vfd_providers.auth.validate"
 # ]

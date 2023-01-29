@@ -30,7 +30,11 @@
   "gc",
   "dev_type",
   "gov_reg_sdate",
-  "gov_reg_edate"
+  "gov_reg_edate",
+  "sandbox",
+  "url",
+  "vfdplus_api_key",
+  "response"
  ],
  "fields": [
   {
@@ -40,6 +44,7 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1,
+   "set_only_once": 1,
    "unique": 1
   },
   {
@@ -173,12 +178,36 @@
    "fieldtype": "Date",
    "label": "Gov Reg EDate",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox"
+  },
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "label": "URL",
+   "options": "URL"
+  },
+  {
+   "fieldname": "vfdplus_api_key",
+   "fieldtype": "Data",
+   "label": "VFDPLUS API KEY",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "response",
+   "fieldtype": "Code",
+   "label": "Response",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2023-01-28 23:04:16.543098",
+ "modified": "2023-01-29 09:58:38.686673",
  "modified_by": "Administrator",
- "module": "VFD Settings",
+ "module": "VFD Providers",
  "name": "VFDPlus Settings",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
@@ -194,10 +223,23 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
   }
  ],
  "read_only": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
