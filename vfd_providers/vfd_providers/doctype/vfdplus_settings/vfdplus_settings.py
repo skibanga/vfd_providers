@@ -35,7 +35,9 @@ vfdplus_status_codes = {
 }
 
 
-def send_vfdplus_request(call_type, company, payload=None, type="GET"):
+def send_vfdplus_request(
+    call_type, company, payload=None, type="GET", vfdplus_settings=None
+):
     """Send request to VFDPlus API
     Parameters
     ----------
@@ -54,7 +56,8 @@ def send_vfdplus_request(call_type, company, payload=None, type="GET"):
     Dictionary with response from VFDPlus API
     """
     vfdplus = frappe.get_cached_doc("VFD Provider", "VFDPlus")
-    vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", company)
+    if not vfdplus_settings:
+        vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", company)
     url = (
         vfdplus.base_url
         + frappe.get_list(
@@ -118,8 +121,10 @@ def post_fiscal_receipt(doc):
 
     cart_items = []
     for item in doc.items:
-        vat_rate_code, vat_rate_id = get_vat_rate_code(item.item_tax_template)
-        cart_items.append({
+        # vat_rate_code, vat_rate_id = get_vat_rate_code(item.item_tax_template)
+        vat_rate_code, vat_rate_id = ("A", 1)
+        cart_items.append(
+            {
                 "vat_rate_code": vat_rate_code,
                 "vat_rate_id": vat_rate_id,
                 "item_name": item.item_code,
@@ -129,7 +134,7 @@ def post_fiscal_receipt(doc):
                 "sp": item.base_net_amount,
                 "unit_discount_perc": 0.0,
                 "unit_discount_amt": 0.0,
-                "total_item_discount": 0.0
+                "total_item_discount": 0.0,
             }
         )
 
@@ -208,11 +213,11 @@ def get_serial_info(doc, method):
     Nothing
     """
     data = send_vfdplus_request(
-        call_type="serial_info", company=doc.company, type="GET"
+        call_type="serial_info", company=doc.company, type="GET", vfdplus_settings=doc
     )
     if data:
         doc.response = str(data["msg_data"])
-        for key, value in data.items():
+        for key, value in data["msg_data"].items():
             try:
                 setattr(doc, key, value)
             except Exception as e:
