@@ -16,74 +16,79 @@ def make_custom_fields():
                 },
                 {
                     "default": "0",
-                    "fieldname": "accept_payment",
+                    "fieldname": "is_auto_generate_vfd",
                     "fieldtype": "Check",
-                    "label": "Accept Payment",
-                    "insert_after": "payments",
+                    "label": "Is Auto Generate VFD",
                 },
                 {
-                    "depends_on": "accept_payment",
-                    "fieldname": "payment_gateway",
-                    "fieldtype": "Link",
-                    "label": "Payment Gateway",
-                    "options": "Payment Gateway",
-                    "insert_after": "accept_payment",
-                },
-                {
-                    "default": "Buy Now",
-                    "depends_on": "accept_payment",
-                    "fieldname": "payment_button_label",
+                    "default": "Not Sent",
+                    "fieldname": "vfd_status",
                     "fieldtype": "Data",
-                    "label": "Button Label",
-                    "insert_after": "payment_gateway",
+                    "label": "VFD Status",
                 },
                 {
-                    "depends_on": "accept_payment",
-                    "fieldname": "payment_button_help",
-                    "fieldtype": "Text",
-                    "label": "Button Help",
-                    "insert_after": "payment_button_label",
+                    "fieldname": "vfd_posting_info",
+                    "fieldtype": "Data",
+                    "label": "VFD Provider Posting",
                 },
                 {
-                    "fieldname": "payments_cb",
-                    "fieldtype": "Column Break",
-                    "insert_after": "payment_button_help",
+                    "fieldname": "vfd_verification_url",
+                    "fieldtype": "Data",
+                    "label": "VFD Verification URL",
                 },
                 {
-                    "default": "0",
-                    "depends_on": "accept_payment",
-                    "fieldname": "amount_based_on_field",
-                    "fieldtype": "Check",
-                    "label": "Amount Based On Field",
-                    "insert_after": "payments_cb",
+                    "label": "VFD Cust ID",
+                    "fieldtype": "Data",
+                    "fieldname": "vfd_cust_id",
+                    "fetch_from": "customer.vfd_cust_id",
+                    "fetch_if_empty": True,
                 },
                 {
-                    "depends_on": "eval:doc.accept_payment && doc.amount_based_on_field",
-                    "fieldname": "amount_field",
-                    "fieldtype": "Select",
-                    "label": "Amount Field",
-                    "insert_after": "amount_based_on_field",
+                    "label":"VFD Details",
+                    "fieldname":"vfd_details",
+                    "fieldtype": "Section Break",
+                    "insert_after": "amended_from",
                 },
                 {
-                    "depends_on": "eval:doc.accept_payment && !doc.amount_based_on_field",
-                    "fieldname": "amount",
-                    "fieldtype": "Currency",
-                    "label": "Amount",
-                    "insert_after": "amount_field",
+                    "label": "VFD Cust ID Type",
+                    "fieldtype": "Data",
+                    "fieldname": "vfd_cust_id_type",
+                    "fetch_from": "customer.vfd_cust_id_type",
+                    "fetch_if_empty": True,
                 },
                 {
-                    "depends_on": "accept_payment",
-                    "fieldname": "currency",
-                    "fieldtype": "Link",
-                    "label": "Currency",
-                    "options": "Currency",
-                    "insert_after": "amount",
+                    "label": "VFD Date",
+                    "fieldtype": "Date",
+                    "fieldname": "vfd_date",
+                },,
+                {
+                    "label": "VFD Time",
+                    "fieldtype": "Time",
+                    "fieldname": "vfd_time",
                 },
             ]
-        }
+        },
+        {
+            "Item Tax Template": [
+                {
+                    "fieldname": "vfd_tax_code",
+                    "fieldtype": "Data",
+                    "label": "VFD Tax Code",
+                },
+            ]
+        },
+        {
+            "Mode of Payment": [
+                {
+                    "fieldname": "vfd_payment_type",
+                    "fieldtype": "Data",
+                    "label": "VFD Payment Type",
+                },
+            ]
+        },
     )
 
-    frappe.clear_cache(doctype="Web Form")
+    frappe.clear_cache(doctype="Sales Invoice")
 
 
 @frappe.whitelist()
@@ -108,7 +113,9 @@ def generate_tra_vfd(docname, sinv_doc=None):
     if not vfd_provider_settings:
         return
     if vfd_provider_settings.vfd_provider == "VFDPlus":
-        from vfd_providers.vfd_providers.doctype.vfdplus_settings.vfdplus_settings import post_fiscal_receipt
+        from vfd_providers.vfd_providers.doctype.vfdplus_settings.vfdplus_settings import (
+            post_fiscal_receipt,
+        )
 
         post_fiscal_receipt(sinv_doc)
 
