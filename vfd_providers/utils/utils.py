@@ -44,8 +44,8 @@ def make_custom_fields():
                     "fetch_if_empty": True,
                 },
                 {
-                    "label":"VFD Details",
-                    "fieldname":"vfd_details",
+                    "label": "VFD Details",
+                    "fieldname": "vfd_details",
                     "fieldtype": "Section Break",
                     "insert_after": "amended_from",
                 },
@@ -60,7 +60,7 @@ def make_custom_fields():
                     "label": "VFD Date",
                     "fieldtype": "Date",
                     "fieldname": "vfd_date",
-                },,
+                },
                 {
                     "label": "VFD Time",
                     "fieldtype": "Time",
@@ -97,17 +97,17 @@ def generate_tra_vfd(docname, sinv_doc=None):
         sinv_doc = frappe.get_doc("Sales Invoice", docname)
     if sinv_doc.is_not_vfd_invoice or sinv_doc.vfd_status == "Sent":
         return
-    comp_vfd_provider = frappe.get_doc(
+    comp_vfd_provider = frappe.get_cached_doc(
         "Company VFD Provider", filters={"name": sinv_doc.company}
     )
     if not comp_vfd_provider:
         return
-    vfd_provider = frappe.get_doc(
+    vfd_provider = frappe.get_cached_doc(
         "VFD Provider", filters={"name": comp_vfd_provider.vfd_provider}
     )
     if not vfd_provider:
         return
-    vfd_provider_settings = frappe.get_doc(
+    vfd_provider_settings = frappe.get_cached_doc(
         "VFD Provider Settings", filters={"name": vfd_provider.vfd_provider_settings}
     )
     if not vfd_provider_settings:
