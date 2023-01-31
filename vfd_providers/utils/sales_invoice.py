@@ -85,88 +85,6 @@ def vfd_validation(doc, method):
                 )
             )
 
-
-def posting_vfd_invoice(invoice_name):
-    doc = frappe.get_doc("Sales Invoice", invoice_name)
-    if doc.vfd_posting_info or doc.docstatus != 1:
-        return
-    if doc.vfd_status == "Not Sent":
-        doc.vfd_status = "Pending"
-        doc.db_update()
-        frappe.db.commit()
-        doc.reload()
-    customer_id_info = get_customer_id_info(doc.customer)
-    if not doc.vfd_cust_id:
-        vfd_cust_id_type = str(customer_id_info["cust_id_type"])
-        vfd_cust_id = customer_id_info["cust_id"]
-    elif doc.vfd_cust_id and not doc.vfd_cust_id_type:
-        frappe.throw(
-            _("Please make sure to set VFD Customer ID Type in Customer Master")
-        )
-    else:
-        vfd_cust_id_type = doc.vfd_cust_id_type
-        vfd_cust_id = doc.vfd_cust_id
-
-    rect_data = {
-        "DATE": doc.vfd_date,
-        # 0:59:30.715164
-        "TIME": format_datetime(str(doc.vfd_time), "HH:mm:ss"),
-        "CUSTIDTYPE": int(vfd_cust_id_type[:1]),
-        "CUSTID": vfd_cust_id,
-        "CUSTNAME": remove_special_characters(doc.customer),
-        "MOBILENUM": customer_id_info["mobile_no"],
-        "RCTNUM": doc.vfd_gc,
-        "DC": doc.vfd_dc,
-        "GC": doc.vfd_gc,
-        "ZNUM": format_datetime(str(doc.vfd_date), "YYYYMMdd"),
-        "RCTVNUM": doc.vfd_rctvnum,
-        "ITEMS": [],
-        "TOTALS": {
-            "TOTALTAXEXCL": flt(doc.base_net_total, 2),
-            "TOTALTAXINCL": flt(doc.base_grand_total, 2),
-            "DISCOUNT": flt(doc.base_discount_amount, 2),
-        },
-        "PAYMENTS": get_payments(doc.payments, doc.base_grand_total),
-        "VATTOTALS": get_vattotals(doc.items, doc.name, vrn),
-    }
-    for item in doc.items:
-        item_data = {
-            "ID": remove_special_characters(
-                item.item_code
-            ),
-            "DESC": remove_special_characters(
-                item.item_name
-            ),
-            "QTY": flt(item.stock_qty, 2),
-            "TAXCODE": get_item_taxcode(
-                item.item_tax_template, item.item_code, doc.name
-            ),
-            "AMT": flt(get_item_inclusive_amount(item), 2),
-        }
-        rect_data["ITEMS"].append({"ITEM": item_data})
-
-
-        posting_info_doc.flags.ignore_permissions = True
-        posting_info_doc.insert(ignore_permissions=True)
-        doc.vfd_status = "Failed"
-        doc.db_update()
-        frappe.db.commit()
-        return "Failed"
-
-    frappe.db.commit()
-    if int(posting_info_doc.ackcode) == 0:
-        doc.vfd_posting_info = posting_info_doc.name
-        doc.vfd_status = "Success"
-        doc.save(ignore_permissions=True)
-        frappe.db.commit()
-        return "Success"
-    else:
-        doc.vfd_status = "Failed"
-        doc.db_update()
-        frappe.db.commit()
-        return "Failed"
-
-
 def get_customer_id_info(customer):
     data = {}
     cust_id, cust_id_type, mobile_no = frappe.get_value(
@@ -216,68 +134,9 @@ def get_item_taxcode(item_tax_template=None, item_code=None, invoice_name=None):
     return taxcode
 
 
-def get_payments(payments, base_grand_total):
-    payments_dict = []
-    total_payments_amount = 0
-    for payment in payments:
-        pmttype = ""
-        vfd_pmttype = frappe.get_value(
-            "Mode of Payment", payment.mode_of_payment, "vfd_pmttype"
-        )
-        if vfd_pmttype:
-            pmttype = vfd_pmttype
-        else:
-            frappe.throw(
-                _(
-                    "VFD Payment Type in Mode of Payment not setup in {0}".format(
-                        payment.mode_of_payment
-                    )
-                )
-            )
-        total_payments_amount += payment.base_amount
-        payments_dict.append({"PMTTYPE": pmttype})
-        payments_dict.append({"PMTAMOUNT": flt(payment.base_amount, 2)})
-
-    if base_grand_total > total_payments_amount:
-        payments_dict.append({"PMTTYPE": "INVOICE"})
-        payments_dict.append(
-            {"PMTAMOUNT": flt(base_grand_total - total_payments_amount, 2)}
-        )
-
-    return payments_dict
-
-
-def get_vattotals(items, invoice_name, vrn):
-    vattotals = {}
-    for item in items:
-        item_taxcode = get_item_taxcode(
-            item.item_tax_template, item.item_code, invoice_name
-        )
-        if not vattotals.get(item_taxcode):
-            vattotals[item_taxcode] = {}
-            vattotals[item_taxcode]["NETTAMOUNT"] = 0
-            vattotals[item_taxcode]["TAXAMOUNT"] = 0
-        vattotals[item_taxcode]["NETTAMOUNT"] += flt(item.base_net_amount, 2)
-        if vrn == "NOT REGISTERED":
-            vattotals[item_taxcode]["TAXAMOUNT"] += 0
-        else:
-            vattotals[item_taxcode]["TAXAMOUNT"] += flt(
-                item.base_net_amount * ((18 / 100) if item_taxcode == 1 else 0), 2
-            )
-
-    taxes_map = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
-
-    vattotals_list = []
-    for key, value in vattotals.items():
-        vattotals_list.append({"VATRATE": taxes_map.get(str(key))})
-        vattotals_list.append({"NETTAMOUNT": flt(value["NETTAMOUNT"], 2)})
-        vattotals_list.append({"TAXAMOUNT": flt(value["TAXAMOUNT"], 2)})
-    return vattotals_list
-
-
 def validate_cancel(doc, method):
-    if doc.vfd_rctnum:
-        frappe.throw(_("This invoice cannot be canceled"))
+    if doc.vfd_rctvnum:
+        frappe.throw(_("This invoice cannot be canceled as it is already sent to TRA. Please cancel it on TRA portal during VAT Filing."))
 
 
 def get_itemised_tax_breakup_html(doc):
