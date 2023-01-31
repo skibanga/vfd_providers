@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from time import sleep
 import frappe, json, requests
 from frappe import _
-
+from frappe.utils import nowdate, nowtime, format_datetime
 
 class VFDPlusSettings(Document):
     def validate(self):
@@ -56,6 +56,8 @@ def send_vfdplus_request(
     Dictionary with response from VFDPlus API
     """
     vfdplus = frappe.get_cached_doc("VFD Provider", "VFDPlus")
+    if not vfdplus:
+        frappe.throw(_("VFDPlus is not setup!"))
     if not vfdplus_settings:
         vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", company)
     url = (
@@ -69,6 +71,7 @@ def send_vfdplus_request(
     )
     headers = {
         "VFDPLUS-API-KEY": vfdplus_settings.vfdplus_api_key,
+        "Content-Type": "application/json"
     }
 
     data = None
@@ -81,11 +84,16 @@ def send_vfdplus_request(
                 headers=headers,
                 timeout=500,
             )
-            if res.status_code == 200:
+            if res.ok:
                 data = json.loads(res.text)
-                if data.get("msg_status") != "OK":
+                if data.get("msg_status") != "OK" and not (data.get("msg_status") == "WARNING" and data.get("msg_code") == 4015):
                     frappe.throw(
                         _(f"Error returned from VFDPlus: {data.get('msg_code')}")
+                    )
+                else:
+                    frappe.log_error(
+                        "Send Request",
+                        f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
                     )
             else:
                 data = []
@@ -118,11 +126,14 @@ def post_fiscal_receipt(doc):
     Nothing
     """
     vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", doc.company)
+    doc.vfd_date = nowdate()
+    doc.vfd_time = format_datetime(str(nowtime()), "HH:mm:ss")
 
     cart_items = []
+    tax_map = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
     for item in doc.items:
-        # vat_rate_code, vat_rate_id = get_vat_rate_code(item.item_tax_template)
-        vat_rate_code, vat_rate_id = ("A", 1)
+        vat_rate_id = frappe.get_cached_value("Item Tax Template", item.item_tax_template, "vfd_taxcode")[:1]
+        vat_rate_code = tax_map[vat_rate_id]
         cart_items.append(
             {
                 "vat_rate_code": vat_rate_code,
@@ -139,16 +150,16 @@ def post_fiscal_receipt(doc):
         )
 
     payload = {
-        "credential_code": vfdplus_settings.company,
+        "credential_code": vfdplus_settings.serial_code,
         "branch_id": "",
         "depart_id": "",
         "trans_no": doc.name,
         "idate": doc.vfd_date,
-        "itime": doc.vfd_time,
+        "itime": format_datetime(str(doc.vfd_time), "HH:mm:ss"),
         "customer_info": {
             "cust_name": doc.customer_name,
-            "cust_id_type": doc.vfd_cust_id_type,
-            "cust_id": doc.vfd_cust_id,
+            "cust_id_type": doc.vfd_cust_id_type or "6",
+            "cust_id": doc.vfd_cust_id or "NIL",
             "cust_phone": "",
             "cust_vrn": "",
             "cust_addr": "",
@@ -156,7 +167,7 @@ def post_fiscal_receipt(doc):
         },
         "payment_methods": [
             {
-                "pmt_type": "INVOICE",
+                "pmt_type": "CASH",
                 "pmt_amount": doc.base_rounded_total or doc.base_grand_total,
             }
         ],
@@ -167,20 +178,7 @@ def post_fiscal_receipt(doc):
             or doc.base_grand_total,
             "discount": 0.0,
         },
-        "cart_items": [
-            {
-                "vat_rate_code": "A",
-                "vat_rate_id": 1,
-                "item_name": "VITUMBUA",
-                "item_barcode": "-1",
-                "item_qty": 10.0,
-                "usp": 1000.0,
-                "sp": 1000.0,
-                "unit_discount_perc": 0.0,
-                "unit_discount_amt": 0.0,
-                "total_item_discount": 0.0,
-            }
-        ],
+        "cart_items": cart_items,
         "user_info": {
             "user_id": "1",
             "username": doc.modified_by.split("@")[0],
@@ -188,15 +186,20 @@ def post_fiscal_receipt(doc):
         },
     }
 
+    payload = json.dumps(payload)
+
+    print(str(payload))
+
     data = send_vfdplus_request("post_fiscal_receipt", doc.company, payload, "POST")
 
-    doc.vfd_rctvnum = data.get("rctvnum")
+    doc.vfd_rctvnum = data["msg_data"].get("rctvnum")
+    doc.vfd_status = "Success"
     doc.vfd_verification_url = (
-        f"https://virtual.tra.go.tz/efdmsRctVerify/{data.get('rctvnum')}_{doc.vfd_time}"
+        f"https://virtual.tra.go.tz/efdmsRctVerify/{doc.vfd_rctvnum}_{doc.vfd_time.replace(':','')}"
     )
     doc.save()
     frappe.db.commit()
-    return
+    return data
 
 
 def get_serial_info(doc, method):
