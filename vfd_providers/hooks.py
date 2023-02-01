@@ -110,9 +110,11 @@ app_license = "GPL"
 # 	}
 # }
 doc_events = {
-    "Sales Invoice": {"on_submit": "vfd_providers.utils.utils.autogenerate_vfd"},
-    "before_cancel": "vfd_providers.utils.sales_invoice.validate_cancel",
-    "before_submit": "vfd_providers.utils.sales_invoice.vfd_validation",
+    "Sales Invoice": {
+        "on_submit": "vfd_providers.utils.utils.autogenerate_vfd",
+        "before_cancel": "vfd_providers.utils.sales_invoice.validate_cancel",
+        "before_submit": "vfd_providers.utils.sales_invoice.vfd_validation",
+    },
 }
 
 # Scheduled Tasks
