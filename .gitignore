@@ -5,3 +5,4 @@
 tags
 vfd_providers/docs/current
 node_modules/
+__pycache__/
