@@ -32,7 +32,6 @@
   "gov_reg_sdate",
   "gov_reg_edate",
   "sandbox",
-  "url",
   "vfdplus_api_key",
   "response"
  ],
@@ -151,6 +150,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.gov_reg_edate",
    "fieldname": "vat_enabled",
    "fieldtype": "Check",
    "label": "VAT Enabled",
@@ -169,6 +169,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.gov_reg_edate",
    "fieldname": "gov_reg_sdate",
    "fieldtype": "Date",
    "label": "Gov Reg SDate"
@@ -186,12 +187,6 @@
    "label": "Sandbox"
   },
   {
-   "fieldname": "url",
-   "fieldtype": "Data",
-   "label": "URL",
-   "options": "URL"
-  },
-  {
    "fieldname": "vfdplus_api_key",
    "fieldtype": "Data",
    "label": "VFDPLUS API KEY",
@@ -205,7 +200,7 @@
   }
  ],
  "links": [],
- "modified": "2023-01-29 09:58:38.686673",
+ "modified": "2023-02-01 23:10:26.128318",
  "modified_by": "Administrator",
  "module": "VFD Providers",
  "name": "VFDPlus Settings",
@@ -237,7 +232,6 @@
    "write": 1
   }
  ],
- "read_only": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
