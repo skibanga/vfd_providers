@@ -1,8 +1,9 @@
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
+
 def execute():
-    fields={
+    fields = {
         "Sales Invoice": [
             {
                 "fieldname": "generate_vfd",
@@ -13,7 +14,7 @@ def execute():
                 "depends_on": "eval: doc.docstatus == 1 &&\
                     doc.is_not_vfd_invoice == 0 && \
                     doc.vfd_status != 'Success' && \
-                    doc.is_return == 0"
+                    doc.is_return == 0",
             },
             {
                 "fieldname": "vfd_details",
@@ -111,9 +112,9 @@ def execute():
         ],
         "Item Tax Template": [
             {
-                "fieldname": "vfd_tax_code",
+                "fieldname": "vfd_taxcode",
                 "fieldtype": "Data",
-                "label": "VFD Tax Code",
+                "label": "VFD TAXCODE",
                 "insert_after": "taxes",
                 "module_def": "VFD Providers",
             },
