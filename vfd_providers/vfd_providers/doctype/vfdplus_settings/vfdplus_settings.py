@@ -36,7 +36,7 @@ vfdplus_status_codes = {
 
 
 def send_vfdplus_request(
-    call_type, company, payload=None, type="GET", vfdplus_settings=None
+    call_type, company, payload=None, type="GET", vfdplus_settings=None, vfd_provider_posting_doc=None
 ):
     """Send request to VFDPlus API
     Parameters
@@ -49,6 +49,10 @@ def send_vfdplus_request(
     Payload to send to VFDPlus API
     type : str
     Type of request to make. e.g. "GET", "POST", "PUT", etc.
+    vfdplus_settings : object
+    Python object which is expected to be from VFDPlus Settings doctype.
+    vfd_provider_posting_doc : object
+    Python object which is expected to be from VFD Provider Posting doctype.
 
     Returns
     -------
@@ -92,16 +96,22 @@ def send_vfdplus_request(
                     )
                 else:
                     frappe.log_error(
-                        "Send Request",
+                        "Send Request OK",
                         f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
                     )
             else:
                 data = []
                 frappe.log_error(
-                    "Send Request",
+                    "Send Request Error",
                     f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
                 )
                 frappe.throw(f"Error is {res.text}")
+            vfd_provider_posting_doc.req_headers = headers
+            vfd_provider_posting_doc.req_data = payload
+            vfd_provider_posting_doc.ackcode = data["msg_code"]
+            vfd_provider_posting_doc.ackmsg = data["msg_data"]
+
+
             break
         except Exception as e:
             sleep(3 * i + 1)
@@ -126,8 +136,8 @@ def post_fiscal_receipt(doc):
     Nothing
     """
     vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", doc.company)
-    doc.vfd_date = nowdate()
-    doc.vfd_time = format_datetime(str(nowtime()), "HH:mm:ss")
+    doc.vfd_date = doc.vfd_date or nowdate()
+    doc.vfd_time = doc.vfd_time or format_datetime(str(nowtime()), "HH:mm:ss")
 
     cart_items = []
     tax_map = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
@@ -190,7 +200,9 @@ def post_fiscal_receipt(doc):
 
     print(str(payload))
 
-    data = send_vfdplus_request("post_fiscal_receipt", doc.company, payload, "POST")
+    vfd_provider_posting_doc = frappe.new_doc("VFD Provider Posting", ignore_permissions=True)
+
+    data = send_vfdplus_request("post_fiscal_receipt", doc.company, payload, "POST", vfd_provider_posting_doc=vfd_provider_posting_doc)
 
     doc.vfd_rctvnum = data["msg_data"].get("rctvnum")
     doc.vfd_status = "Success"
@@ -198,6 +210,13 @@ def post_fiscal_receipt(doc):
         f"https://virtual.tra.go.tz/efdmsRctVerify/{doc.vfd_rctvnum}_{doc.vfd_time.replace(':','')}"
     )
     doc.save()
+
+    vfd_provider_posting_doc.sales_invoice = doc.name
+    vfd_provider_posting_doc.rctnum = doc.vfd_rctvnum
+    vfd_provider_posting_doc.date = doc.vfd_date
+    vfd_provider_posting_doc.time = doc.vfd_time
+    vfd_provider_posting_doc.save()
+
     frappe.db.commit()
     return data
 
