@@ -106,10 +106,11 @@ def send_vfdplus_request(
                     f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
                 )
                 frappe.throw(f"Error is {res.text}")
-            vfd_provider_posting_doc.req_headers = headers
-            vfd_provider_posting_doc.req_data = payload
-            vfd_provider_posting_doc.ackcode = data["msg_code"]
-            vfd_provider_posting_doc.ackmsg = data["msg_data"]
+            if vfd_provider_posting_doc:
+                vfd_provider_posting_doc.req_headers = json.dumps(headers, ensure_ascii=False).replace("\\'", "'").replace('\\"', '"')
+                vfd_provider_posting_doc.req_data = json.dumps(payload, ensure_ascii=False).replace("\\'", "'").replace('\\"', '"')
+                vfd_provider_posting_doc.ackcode = data["msg_code"]
+                vfd_provider_posting_doc.ackmsg = str(data["msg_data"]).replace("\\'", "'").replace('\\"', '"')
 
 
             break
@@ -198,16 +199,16 @@ def post_fiscal_receipt(doc):
 
     payload = json.dumps(payload)
 
-    print(str(payload))
-
     vfd_provider_posting_doc = frappe.new_doc("VFD Provider Posting", ignore_permissions=True)
 
     data = send_vfdplus_request("post_fiscal_receipt", doc.company, payload, "POST", vfd_provider_posting_doc=vfd_provider_posting_doc)
 
     doc.vfd_rctvnum = data["msg_data"].get("rctvnum")
+    doc.vfd_date = data["msg_data"].get("idate")
+    doc.vfd_time = data["msg_data"].get("itime")
     doc.vfd_status = "Success"
     doc.vfd_verification_url = (
-        f"https://virtual.tra.go.tz/efdmsRctVerify/{doc.vfd_rctvnum}_{doc.vfd_time.replace(':','')}"
+        f"https://virtual.tra.go.tz/efdmsRctVerify/{doc.vfd_rctvnum}_{str(doc.vfd_time).replace(':','')}"
     )
     doc.save()
 
@@ -235,7 +236,7 @@ def get_serial_info(doc, method):
     Nothing
     """
     data = send_vfdplus_request(
-        call_type="serial_info", company=doc.company, type="GET", vfdplus_settings=doc
+        call_type="serial_info", company=doc.company, type="GET", vfdplus_settings=doc, vfd_provider_posting_doc=None
     )
     if data:
         doc.response = str(data["msg_data"])
