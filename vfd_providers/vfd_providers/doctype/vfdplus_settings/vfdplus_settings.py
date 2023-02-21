@@ -208,7 +208,7 @@ def post_fiscal_receipt(doc):
     doc.vfd_time = data["msg_data"].get("itime")
     doc.vfd_status = "Success"
     doc.vfd_verification_url = (
-        f"https://virtual.tra.go.tz/efdmsRctVerify/{doc.vfd_rctvnum}_{str(doc.vfd_time).replace(':','')}"
+        f"https://verify.tra.go.tz/{doc.vfd_rctvnum}_{str(doc.vfd_time).replace(':','')}"
     )
     doc.save()
 
