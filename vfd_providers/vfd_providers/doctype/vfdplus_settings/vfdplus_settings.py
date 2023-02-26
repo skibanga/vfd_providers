@@ -138,7 +138,7 @@ def post_fiscal_receipt(doc):
     """
     vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", doc.company)
     doc.vfd_date = doc.vfd_date or nowdate()
-    doc.vfd_time = doc.vfd_time or format_datetime(str(nowtime()), "HH:mm:ss")
+    doc.vfd_time = format_datetime(str(nowtime()), "HH:mm:ss")
 
     cart_items = []
     tax_map = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
@@ -208,7 +208,7 @@ def post_fiscal_receipt(doc):
     doc.vfd_time = data["msg_data"].get("itime")
     doc.vfd_status = "Success"
     doc.vfd_verification_url = (
-        f"https://verify.tra.go.tz/{doc.vfd_rctvnum}_{str(doc.vfd_time).replace(':','')}"
+        f"https://verify.tra.go.tz/{doc.vfd_rctvnum}_{str(data['msg_data'].get('itime')).replace(':','')}"
     )
     doc.save()
 
