@@ -145,6 +145,12 @@ def post_fiscal_receipt(doc):
     for item in doc.items:
         vat_rate_id = frappe.get_cached_value("Item Tax Template", item.item_tax_template, "vfd_taxcode")[:1]
         vat_rate_code = tax_map[vat_rate_id]
+        if vat_rate_code == 'A':
+                if item.base_net_amount == item.base_amount:
+                        # both amounts are same if the price is exclusive of VAT
+                        sp = item.base_net_amount * 1.18
+                else:
+                        sp = item.base_net_amount
         cart_items.append(
             {
                 "vat_rate_code": vat_rate_code,
@@ -152,8 +158,8 @@ def post_fiscal_receipt(doc):
                 "item_name": item.item_code,
                 "item_barcode": "-1",
                 "item_qty": item.qty,
-                "usp": item.base_net_rate,
-                "sp": item.base_net_amount,
+                "usp": sp / item.qty,
+                "sp": sp,
                 "unit_discount_perc": 0.0,
                 "unit_discount_amt": 0.0,
                 "total_item_discount": 0.0,
@@ -199,7 +205,7 @@ def post_fiscal_receipt(doc):
 
     payload = json.dumps(payload)
 
-    vfd_provider_posting_doc = frappe.new_doc("VFD Provider Posting", ignore_permissions=True)
+    vfd_provider_posting_doc = frappe.new_doc("VFD Provider Posting")
 
     data = send_vfdplus_request("post_fiscal_receipt", doc.company, payload, "POST", vfd_provider_posting_doc=vfd_provider_posting_doc)
 
