@@ -151,6 +151,8 @@ def post_fiscal_receipt(doc):
                         sp = item.base_net_amount * 1.18
                 else:
                         sp = item.base_amount
+        else:
+            sp = item.base_amount
         cart_items.append(
             {
                 "vat_rate_code": vat_rate_code,
