@@ -15,6 +15,7 @@ def execute():
                     doc.is_not_vfd_invoice == 0 && \
                     doc.vfd_status != 'Success' && \
                     doc.is_return == 0",
+                "allow_on_submit": 1,
             },
             {
                 "fieldname": "vfd_details",
@@ -31,6 +32,7 @@ def execute():
                 "allow_on_submit": 1,
                 "read_only": 1,
                 "module_def": "VFD Providers",
+                "allow_on_submit": 1,
             },
             {
                 "fieldname": "vfd_time",
@@ -75,6 +77,7 @@ def execute():
                 "allow_on_submit": 1,
                 "read_only": 1,
                 "module_def": "VFD Providers",
+                "allow_on_submit": 1,
             },
             {
                 "fieldname": "is_not_vfd_invoice",
@@ -99,6 +102,7 @@ def execute():
                 "fetch_if_empty": 1,
                 "insert_after": "is_auto_generate_vfd",
                 "module_def": "VFD Providers",
+                "allow_on_submit": 1,
             },
             {
                 "fieldname": "vfd_cust_id_type",
@@ -117,6 +121,7 @@ def execute():
                 "label": "VFD TAXCODE",
                 "insert_after": "taxes",
                 "module_def": "VFD Providers",
+                "allow_on_submit": 1,
             },
         ],
         "Mode of Payment": [

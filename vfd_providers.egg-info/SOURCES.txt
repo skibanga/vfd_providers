@@ -51,3 +51,4 @@ vfd_providers/vfd_settings/doctype/company_vfd_provider/company_vfd_provider.js
 vfd_providers/vfd_settings/doctype/company_vfd_provider/company_vfd_provider.json
 vfd_providers/vfd_settings/doctype/company_vfd_provider/company_vfd_provider.py
 vfd_providers/vfd_settings/doctype/company_vfd_provider/test_company_vfd_provider.py
+vfd_providers/www/__init__.py
