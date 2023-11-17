@@ -96,14 +96,14 @@ def send_vfdplus_request(
                     )
                 else:
                     frappe.log_error(
-                        "Send Request OK",
-                        f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
+                        title="Send Request OK",
+                        message=f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
                     )
             else:
                 data = []
                 frappe.log_error(
-                    "Send Request Error",
-                    f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
+                    title="Send Request Error",
+                    message=f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
                 )
                 frappe.throw(f"Error is {res.text}")
             if vfd_provider_posting_doc:
@@ -119,7 +119,10 @@ def send_vfdplus_request(
             if i != 2:
                 continue
             else:
-                frappe.log_error(frappe.get_traceback(), str(e))
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=str(e)
+                )
                 frappe.throw(f"Connection failure is {res.text}")
                 raise e
     return data
@@ -253,7 +256,8 @@ def get_serial_info(doc, method):
                 setattr(doc, key, value)
             except Exception as e:
                 frappe.log_error(
-                    frappe.get_traceback(), "Error in set attribute for VFDPlus"
+                    message=frappe.get_traceback(),
+                    title="Error in set attribute for VFDPlus"
                 )
                 raise e
     if method != "validate":
