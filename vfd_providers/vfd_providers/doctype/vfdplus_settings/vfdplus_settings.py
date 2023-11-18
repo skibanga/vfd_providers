@@ -121,7 +121,7 @@ def send_vfdplus_request(
             else:
                 frappe.log_error(
                     message=frappe.get_traceback(),
-                    title=str(e)
+                    title=str(e)[:140] if e else "Send VFDPLus Request Error"
                 )
                 frappe.throw(f"Connection failure is {res.text}")
                 raise e
