@@ -116,7 +116,7 @@ def execute():
                 "allow_on_submit": 1,
                 "fieldname": "vfd_posting_info",
                 "fieldtype": "Link",
-                "options": "VFD Invoice Posting Info",
+                "options": "VFD Provider Posting",
             },
             {
                 "no_copy": 1,
@@ -180,15 +180,6 @@ def execute():
                 "translatable": 1,
                 "fieldname": "vfd_verification_url",
                 "fieldtype": "Data",
-            },
-            {
-                "label": "VFD Z Report",
-                "no_copy": 1,
-                "insert_after": "vfd_cust_id",
-                "allow_on_submit": 1,
-                "fieldname": "vfd_z_report",
-                "fieldtype": "Link",
-                "options": "VFD Z Report",
             },
         ],
         "Item Tax Template": [
