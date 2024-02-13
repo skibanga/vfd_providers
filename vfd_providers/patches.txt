@@ -1,4 +1,6 @@
-vfd_providers.patches.custom_fields.vfd_providers_custom_fields
-vfd_providers.patches.custom_fields.custom_fields_for_customer_and_item_tax_template
-vfd_providers.patches.custom_fields.vfd_verification_url_custom_field_on_invoice
-vfd_providers.patches.custom_fields.vfd_with_no_copy_checked_custom_fields   
+[pre_model_sync]
+
+
+[post_model_sync]
+
+vfd_providers.patches.custom_fields.vfd_providers_updated_custom_fields   

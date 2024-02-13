@@ -7,9 +7,9 @@ frappe.ui.form.on("Customer", {
         }
     },
     vfd_cust_id: function (frm) {
-        frappe.msgprint(string(frm.doc.vfd_cust_id.length))
-        frappe.msgprint(frm.doc.vfd_cust_id_type.startsWith('1'))
-        if (frm.doc.vfd_cust_id_type.length != 9 && frm.doc.vfd_cust_id_type.startsWith('1')) {
+        // frappe.msgprint(string(frm.doc.vfd_cust_id.length))
+        // frappe.msgprint(frm.doc.vfd_cust_id_type.startsWith('1'))
+        if (frm.doc.tax_id.length != 9 && frm.doc.vfd_cust_id_type.startsWith('1')) {
             frappe.throw(__("TIN Number is should be 9 numbers only, Please remove the dashes"));
         }
     },
