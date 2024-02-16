@@ -85,10 +85,18 @@ def vfd_validation(doc, method):
                 )
             )
 
+    if not doc.vfd_cust_id_type or not doc.vfd_cust_id:
+        data = get_customer_id_info(doc.customer)
+        if data.get("cust_id"):
+            doc.vfd_cust_id = data.get("cust_id")
+        if data.get("cust_id_type"):
+            doc.vfd_cust_id_type = data.get("cust_id_type")
+
+
 def get_customer_id_info(customer):
     data = {}
     cust_id, cust_id_type, mobile_no = frappe.get_value(
-        "Customer", customer, ["vfd_custid", "vfd_custidtype", "mobile_no"]
+        "Customer", customer, ["vfd_cust_id", "vfd_cust_id_type", "mobile_no"]
     )
     if not cust_id:
         data["cust_id"] = ""
