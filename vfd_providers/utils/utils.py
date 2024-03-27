@@ -26,6 +26,13 @@ def generate_tra_vfd(docname, sinv_doc=None):
 
         post_fiscal_receipt(sinv_doc)
 
+    elif vfd_provider.name == "TotalVFD":
+        from vfd_providers.vfd_providers.doctype.total_vfd_setting.total_vfd_setting import (
+            post_fiscal_receipt,
+        )
+
+        post_fiscal_receipt(sinv_doc)
+
 
 def autogenerate_vfd(doc, method):
     if doc.is_not_vfd_invoice or doc.vfd_status == "Sent":
