@@ -20,10 +20,8 @@ def vfd_validation(doc, method):
         frappe.throw(_("Base net amount is zero. Correct the invoice and retry."))
 
     vfdplus_settings = None
-    try:
+    if frappe.db.exists("VFDPlus Settings", {"name": doc.company}):
         vfdplus_settings = frappe.get_doc("VFDPlus Settings", doc.company)
-    except Exception as e:
-        print(f"VFDPlus Settings not found for company {doc.company}")
 
     tax_data = get_itemised_tax_breakup_html(doc)
     if not tax_data:
