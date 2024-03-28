@@ -24,7 +24,7 @@ def post_fiscal_receipt(doc):
     -------
     Nothing
     """
-    total_vfd_setting = frappe.get_cached_doc("Total VFD Setting", doc.company)
+    total_vfd_setting = frappe.get_doc("Total VFD Setting", doc.company)
     doc.vfd_date = doc.vfd_date or nowdate()
     doc.vfd_time = format_datetime(str(nowtime()), "HH:mm:ss")
 
@@ -58,7 +58,7 @@ def post_fiscal_receipt(doc):
         "serial": total_vfd_setting.serial_id,
         "customer": {
             "name": doc.customer_name,
-            "idType": doc.vfd_cust_id_type or "6",
+            "idType": doc.vfd_cust_id_type[:1] or "6",
             "idValue": doc.vfd_cust_id or "NIL",
             "mobile": "",
         },
@@ -94,7 +94,7 @@ def post_fiscal_receipt(doc):
     vfd_provider_posting_doc.rctnum = doc.vfd_rctvnum
     vfd_provider_posting_doc.date = doc.vfd_date
     vfd_provider_posting_doc.time = doc.vfd_time
-    vfd_provider_posting_doc.ackmsg = data
+    vfd_provider_posting_doc.ackmsg = str(data)
     vfd_provider_posting_doc.save()
 
     frappe.db.commit()
@@ -130,7 +130,7 @@ def send_total_vfd_request(
     data : dict
     Dictionary with response from Total VFD API
     """
-    total_vfd = frappe.get_cached_doc("VFD Provider", "Total VFD")
+    total_vfd = frappe.get_doc("VFD Provider", "TotalVFD")
     if not total_vfd:
         frappe.throw(_("Total VFD is not setup!"))
     if not total_vfd_setting:
