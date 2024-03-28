@@ -9,6 +9,10 @@ from frappe import _
 from frappe.utils import nowdate, nowtime, format_datetime
 
 
+class TotalVFDSetting(Document):
+    pass
+
+
 def post_fiscal_receipt(doc):
     """Post fiscal receipt to Total VFD
     Parameters
@@ -60,7 +64,7 @@ def post_fiscal_receipt(doc):
         },
         "payments": [
             {
-                "type": "INVOICE",
+                "type": "invoice",
                 "amount": doc.base_grand_total,
             }
         ],
@@ -79,18 +83,18 @@ def post_fiscal_receipt(doc):
         vfd_provider_posting_doc=vfd_provider_posting_doc,
     )
 
-    doc.vfd_rctvnum = data["msg_data"].get("rctvnum")
-    doc.vfd_date = data["msg_data"].get("localDate")
-    doc.vfd_time = data["msg_data"].get("localTime")
+    doc.vfd_rctvnum = data.get("rctvnum")
+    doc.vfd_date = data.get("localDate")
+    doc.vfd_time = data.get("localTime")
     doc.vfd_status = "Success"
-    doc.vfd_verification_url = data["msg_data"].get("verificationLink")
+    doc.vfd_verification_url = data.get("verificationLink")
     doc.save()
 
     vfd_provider_posting_doc.sales_invoice = doc.name
     vfd_provider_posting_doc.rctnum = doc.vfd_rctvnum
     vfd_provider_posting_doc.date = doc.vfd_date
     vfd_provider_posting_doc.time = doc.vfd_time
-    vfd_provider_posting_doc.ackmsg = data["msg_data"]
+    vfd_provider_posting_doc.ackmsg = data
     vfd_provider_posting_doc.save()
 
     frappe.db.commit()
@@ -135,14 +139,14 @@ def send_total_vfd_request(
         total_vfd.base_url
         + frappe.get_list(
             "VFD Provider Attribute",
-            filters={"parent": "Total VFD", "key": call_type},
+            filters={"parent": "TotalVFD", "key": call_type},
             fields=["value"],
             ignore_permissions=True,
         )[0].value
     )
     headers = {
-        "Authorization": "Bearer " + total_vfd_setting.bearer_token,
-        "x-active-business": total_vfd_setting.x_active_business,
+        "Authorization": "Bearer " + total_vfd_setting.get_password("bearer_token"),
+        "x-active-business": total_vfd_setting.get_password("x_active_business"),
         "Content-Type": "application/json",
     }
 
@@ -182,7 +186,7 @@ def send_total_vfd_request(
                 )
                 vfd_provider_posting_doc.ackcode = data["status"]
                 vfd_provider_posting_doc.ackmsg = (
-                    str(data["msg_data"]).replace("\\'", "'").replace('\\"', '"')
+                    str(data).replace("\\'", "'").replace('\\"', '"')
                 )
 
             break
