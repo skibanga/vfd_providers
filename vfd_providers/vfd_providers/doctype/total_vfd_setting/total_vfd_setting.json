@@ -32,8 +32,7 @@
   {
    "fieldname": "serial_id",
    "fieldtype": "Data",
-   "label": "Serial ID",
-   "read_only": 1
+   "label": "Serial ID"
   },
   {
    "fieldname": "company_name",
@@ -50,21 +49,18 @@
   {
    "fieldname": "tin",
    "fieldtype": "Data",
-   "label": "TIN",
-   "read_only": 1
+   "label": "TIN"
   },
   {
    "fieldname": "vrn",
    "fieldtype": "Data",
-   "label": "VRN",
-   "read_only": 1
+   "label": "VRN"
   },
   {
    "fieldname": "bearer_token",
    "fieldtype": "Password",
    "label": "Bearer Token",
-   "length": 250,
-   "read_only": 1
+   "length": 250
   },
   {
    "fieldname": "x_active_business",
@@ -79,7 +75,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-20 18:14:23.029863",
+ "modified": "2024-03-28 16:39:09.197685",
  "modified_by": "Administrator",
  "module": "VFD Providers",
  "name": "Total VFD Setting",

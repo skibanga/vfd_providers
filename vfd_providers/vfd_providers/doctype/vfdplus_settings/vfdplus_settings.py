@@ -8,6 +8,7 @@ import frappe, json, requests
 from frappe import _
 from frappe.utils import nowdate, nowtime, format_datetime
 
+
 class VFDPlusSettings(Document):
     def validate(self):
         get_serial_info(self, method="validate")
@@ -36,7 +37,12 @@ vfdplus_status_codes = {
 
 
 def send_vfdplus_request(
-    call_type, company, payload=None, type="GET", vfdplus_settings=None, vfd_provider_posting_doc=None
+    call_type,
+    company,
+    payload=None,
+    type="GET",
+    vfdplus_settings=None,
+    vfd_provider_posting_doc=None,
 ):
     """Send request to VFDPlus API
     Parameters
@@ -63,7 +69,7 @@ def send_vfdplus_request(
     if not vfdplus:
         frappe.throw(_("VFDPlus is not setup!"))
     if not vfdplus_settings:
-        vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", company)
+        vfdplus_settings = frappe.get_doc("VFDPlus Settings", company)
     url = (
         vfdplus.base_url
         + frappe.get_list(
@@ -75,7 +81,7 @@ def send_vfdplus_request(
     )
     headers = {
         "VFDPLUS-API-KEY": vfdplus_settings.vfdplus_api_key,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
     data = None
@@ -90,7 +96,9 @@ def send_vfdplus_request(
             )
             if res.ok:
                 data = json.loads(res.text)
-                if data.get("msg_status") != "OK" and not (data.get("msg_status") == "WARNING" and data.get("msg_code") == 4015):
+                if data.get("msg_status") != "OK" and not (
+                    data.get("msg_status") == "WARNING" and data.get("msg_code") == 4015
+                ):
                     frappe.throw(
                         _(f"Error returned from VFDPlus: {data.get('msg_code')}")
                     )
@@ -107,11 +115,20 @@ def send_vfdplus_request(
                 )
                 frappe.throw(f"Error is {res.text}")
             if vfd_provider_posting_doc:
-                vfd_provider_posting_doc.req_headers = json.dumps(headers, ensure_ascii=False).replace("\\'", "'").replace('\\"', '"')
-                vfd_provider_posting_doc.req_data = json.dumps(payload, ensure_ascii=False).replace("\\'", "'").replace('\\"', '"')
+                vfd_provider_posting_doc.req_headers = (
+                    json.dumps(headers, ensure_ascii=False)
+                    .replace("\\'", "'")
+                    .replace('\\"', '"')
+                )
+                vfd_provider_posting_doc.req_data = (
+                    json.dumps(payload, ensure_ascii=False)
+                    .replace("\\'", "'")
+                    .replace('\\"', '"')
+                )
                 vfd_provider_posting_doc.ackcode = data["msg_code"]
-                vfd_provider_posting_doc.ackmsg = str(data["msg_data"]).replace("\\'", "'").replace('\\"', '"')
-
+                vfd_provider_posting_doc.ackmsg = (
+                    str(data["msg_data"]).replace("\\'", "'").replace('\\"', '"')
+                )
 
             break
         except Exception as e:
@@ -121,7 +138,7 @@ def send_vfdplus_request(
             else:
                 frappe.log_error(
                     message=frappe.get_traceback(),
-                    title=str(e)[:140] if e else "Send VFDPLus Request Error"
+                    title=str(e)[:140] if e else "Send VFDPLus Request Error",
                 )
                 frappe.throw(f"Connection failure is {res.text}")
                 raise e
@@ -139,21 +156,23 @@ def post_fiscal_receipt(doc):
     -------
     Nothing
     """
-    vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", doc.company)
+    vfdplus_settings = frappe.get_doc("VFDPlus Settings", doc.company)
     doc.vfd_date = doc.vfd_date or nowdate()
     doc.vfd_time = format_datetime(str(nowtime()), "HH:mm:ss")
 
     cart_items = []
     tax_map = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
     for item in doc.items:
-        vat_rate_id = frappe.get_cached_value("Item Tax Template", item.item_tax_template, "vfd_taxcode")[:1]
+        vat_rate_id = frappe.get_cached_value(
+            "Item Tax Template", item.item_tax_template, "vfd_taxcode"
+        )[:1]
         vat_rate_code = tax_map[vat_rate_id]
-        if vat_rate_code == 'A':
-                if item.base_net_amount == item.base_amount:
-                        # both amounts are same if the price is exclusive of VAT
-                        sp = item.base_net_amount * 1.18
-                else:
-                        sp = item.base_amount
+        if vat_rate_code == "A":
+            if item.base_net_amount == item.base_amount:
+                # both amounts are same if the price is exclusive of VAT
+                sp = item.base_net_amount * 1.18
+            else:
+                sp = item.base_amount
         else:
             sp = item.base_amount
         cart_items.append(
@@ -212,15 +231,19 @@ def post_fiscal_receipt(doc):
 
     vfd_provider_posting_doc = frappe.new_doc("VFD Provider Posting")
 
-    data = send_vfdplus_request("post_fiscal_receipt", doc.company, payload, "POST", vfd_provider_posting_doc=vfd_provider_posting_doc)
+    data = send_vfdplus_request(
+        "post_fiscal_receipt",
+        doc.company,
+        payload,
+        "POST",
+        vfd_provider_posting_doc=vfd_provider_posting_doc,
+    )
 
     doc.vfd_rctvnum = data["msg_data"].get("rctvnum")
     doc.vfd_date = data["msg_data"].get("idate")
     doc.vfd_time = data["msg_data"].get("itime")
     doc.vfd_status = "Success"
-    doc.vfd_verification_url = (
-        f"https://verify.tra.go.tz/{doc.vfd_rctvnum}_{str(data['msg_data'].get('itime')).replace(':','')}"
-    )
+    doc.vfd_verification_url = f"https://verify.tra.go.tz/{doc.vfd_rctvnum}_{str(data['msg_data'].get('itime')).replace(':','')}"
     doc.save()
 
     vfd_provider_posting_doc.sales_invoice = doc.name
@@ -247,7 +270,11 @@ def get_serial_info(doc, method):
     Nothing
     """
     data = send_vfdplus_request(
-        call_type="serial_info", company=doc.company, type="GET", vfdplus_settings=doc, vfd_provider_posting_doc=None
+        call_type="serial_info",
+        company=doc.company,
+        type="GET",
+        vfdplus_settings=doc,
+        vfd_provider_posting_doc=None,
     )
     if data:
         doc.response = str(data["msg_data"])
@@ -257,7 +284,7 @@ def get_serial_info(doc, method):
             except Exception as e:
                 frappe.log_error(
                     message=frappe.get_traceback(),
-                    title="Error in set attribute for VFDPlus"
+                    title="Error in set attribute for VFDPlus",
                 )
                 raise e
     if method != "validate":

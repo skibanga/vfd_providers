@@ -1,5 +1,5 @@
 frappe.ui.form.on("Sales Invoice", {
-  refresh: function (frm) {},
+  refresh: function (frm) { },
   generate_vfd: (frm) => {
     if (!frm.doc.vfd_cust_id) {
       frappe.msgprint({

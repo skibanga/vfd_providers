@@ -19,7 +19,11 @@ def vfd_validation(doc, method):
     if doc.base_net_total == 0:
         frappe.throw(_("Base net amount is zero. Correct the invoice and retry."))
 
-    vfdplus_settings = frappe.get_cached_doc("VFDPlus Settings", doc.company)
+    vfdplus_settings = None
+    try:
+        vfdplus_settings = frappe.get_doc("VFDPlus Settings", doc.company)
+    except Exception as e:
+        print(f"VFDPlus Settings not found for company {doc.company}")
 
     tax_data = get_itemised_tax_breakup_html(doc)
     if not tax_data:
@@ -144,7 +148,11 @@ def get_item_taxcode(item_tax_template=None, item_code=None, invoice_name=None):
 
 def validate_cancel(doc, method):
     if doc.vfd_rctvnum:
-        frappe.throw(_("This invoice cannot be canceled as it is already sent to TRA. Please cancel it on TRA portal during VAT Filing."))
+        frappe.throw(
+            _(
+                "This invoice cannot be canceled as it is already sent to TRA. Please cancel it on TRA portal during VAT Filing."
+            )
+        )
 
 
 def get_itemised_tax_breakup_html(doc):
