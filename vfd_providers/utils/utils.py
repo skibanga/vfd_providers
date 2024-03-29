@@ -7,7 +7,7 @@ from frappe import _
 def generate_tra_vfd(docname, sinv_doc=None):
     if not sinv_doc:
         sinv_doc = frappe.get_doc("Sales Invoice", docname)
-    if sinv_doc.is_not_vfd_invoice or sinv_doc.vfd_status == "Sent":
+    if sinv_doc.is_not_vfd_invoice or sinv_doc.vfd_status in ["Sent", "Success"]:
         return
     comp_vfd_provider = frappe.get_cached_doc("Company VFD Provider", sinv_doc.company)
     if not comp_vfd_provider:
