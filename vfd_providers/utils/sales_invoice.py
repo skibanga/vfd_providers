@@ -62,7 +62,7 @@ def vfd_validation(doc, method):
                 )
             )
         if item_taxcode == 1 and with_tax != 1:
-            if vfdplus_settings.vat_enabled:
+            if vfdplus_settings and vfdplus_settings.vat_enabled:
                 frappe.msgprint(
                     _(
                         "Taxes is not set to 18pct for Standard Rate item {0}".format(
