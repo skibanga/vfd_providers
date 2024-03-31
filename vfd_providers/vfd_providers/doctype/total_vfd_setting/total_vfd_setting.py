@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from time import sleep
 import frappe, json, requests
 from frappe import _
-from frappe.utils import nowdate, nowtime, format_datetime
+from frappe.utils import nowdate, nowtime, format_datetime, flt
 
 
 class TotalVFDSetting(Document):
@@ -28,7 +28,7 @@ def post_fiscal_receipt(doc):
     doc.vfd_date = doc.vfd_date or nowdate()
     doc.vfd_time = format_datetime(str(nowtime()), "HH:mm:ss")
 
-    items = []
+    vat_group_totals = {}
     tax_map = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
     for item in doc.items:
         vat_rate_id = frappe.get_cached_value(
@@ -38,18 +38,32 @@ def post_fiscal_receipt(doc):
         if vat_group == "A":
             if item.base_net_amount == item.base_amount:
                 # both amounts are same if the price is exclusive of VAT
-                price = item.base_net_amount * 1.18
+                price = flt(item.base_net_amount * 1.18, precision=2)
             else:
-                price = item.base_amount
+                price = flt(item.base_amount, precision=2)
         else:
             price = item.base_amount
+        # Check if the VAT group already exists in the dictionary; if not, initialize it
+        if vat_group not in vat_group_totals:
+            vat_group_totals[vat_group] = 0
+
+        # Add the calculated price to the respective VAT group's total
+        vat_group_totals[vat_group] += flt(price, precision=2)
+    # Convert the aggregated totals into a list of dictionaries
+    vat_group_totals_list = [
+        {"vat_group": vat_group, "total_price": total_price}
+        for vat_group, total_price in vat_group_totals.items()
+    ]
+
+    items = []
+    for vat_group_entry in vat_group_totals_list:
         items.append(
             {
-                "id": item.item_code,
-                "name": item.item_name,
-                "price": price,
-                "qty": item.qty,
-                "vatGroup": vat_group,
+                "id": f"""Items in VAT Group {vat_group_entry["vat_group"]}""",
+                "name": f"""Items in VAT Group {vat_group_entry["vat_group"]}""",
+                "price": vat_group_entry["total_price"],
+                "qty": 1,
+                "vatGroup": vat_group_entry["vat_group"],
                 "discount": 0.0,
             }
         )
@@ -59,7 +73,7 @@ def post_fiscal_receipt(doc):
         "customer": {
             "name": doc.customer_name,
             "idType": doc.vfd_cust_id_type[:1] or "6",
-            "idValue": doc.vfd_cust_id or "NIL",
+            "idValue": doc.vfd_cust_id or "999999999",
             "mobile": "",
         },
         "payments": [
