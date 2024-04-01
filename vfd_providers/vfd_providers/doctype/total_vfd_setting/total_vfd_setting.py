@@ -28,6 +28,11 @@ def post_fiscal_receipt(doc):
     doc.vfd_date = doc.vfd_date or nowdate()
     doc.vfd_time = format_datetime(str(nowtime()), "HH:mm:ss")
 
+    if total_vfd_setting.is_vat_grouped:
+        vat_grouped = 1
+    else:
+        vat_grouped = 0
+    items = []
     vat_group_totals = {}
     tax_map = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
     for item in doc.items:
@@ -49,31 +54,44 @@ def post_fiscal_receipt(doc):
 
         # Add the calculated price to the respective VAT group's total
         vat_group_totals[vat_group] += flt(price, precision=2)
+        items.append(
+            {
+                "id": item.item_code,
+                "name": item.item_name,
+                "price": price,
+                "qty": item.qty,
+                "vatGroup": vat_group,
+                "discount": 0.0,
+            }
+        )
     # Convert the aggregated totals into a list of dictionaries
     vat_group_totals_list = [
         {"vat_group": vat_group, "total_price": total_price}
         for vat_group, total_price in vat_group_totals.items()
     ]
 
-    items = []
-    for vat_group_entry in vat_group_totals_list:
-        items.append(
-            {
-                "id": f"""Items in VAT Group {vat_group_entry["vat_group"]}""",
-                "name": f"""Items in VAT Group {vat_group_entry["vat_group"]}""",
-                "price": vat_group_entry["total_price"],
-                "qty": 1,
-                "vatGroup": vat_group_entry["vat_group"],
-                "discount": 0.0,
-            }
-        )
+    if vat_grouped:
+        # Re-create items list based on VAT group totals
+        items = []
+        for vat_group_entry in vat_group_totals_list:
+            items.append(
+                {
+                    "id": f"""Items in VAT Group {vat_group_entry["vat_group"]}""",
+                    "name": f"""Items in VAT Group {vat_group_entry["vat_group"]}""",
+                    "price": vat_group_entry["total_price"],
+                    "qty": 1,
+                    "vatGroup": vat_group_entry["vat_group"],
+                    "discount": 0.0,
+                }
+            )
 
+    vfd_cust_id_type = doc.vfd_cust_id_type[:1] or "6"
     payload = {
         "serial": total_vfd_setting.serial_id,
         "customer": {
             "name": doc.customer_name,
-            "idType": doc.vfd_cust_id_type[:1] or "6",
-            "idValue": doc.vfd_cust_id or "999999999",
+            "idType": vfd_cust_id_type,
+            "idValue": doc.vfd_cust_id if vfd_cust_id_type != "6" else "",
             "mobile": "",
         },
         "payments": [
@@ -184,7 +202,7 @@ def send_total_vfd_request(
                 data = []
                 frappe.log_error(
                     title="Send Request Error",
-                    message=f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}",
+                    message=f"Send Request: {url} - Status Code: {res.status_code}\n{res.text}\n{payload}",
                 )
                 frappe.throw(f"Error is {res.text}")
             if vfd_provider_posting_doc:

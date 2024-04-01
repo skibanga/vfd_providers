@@ -16,7 +16,9 @@
   "vrn",
   "bearer_token",
   "x_active_business",
-  "start_date"
+  "start_date",
+  "section_break_rklsa",
+  "is_vfd_grouped"
  ],
  "fields": [
   {
@@ -72,10 +74,20 @@
    "fieldname": "start_date",
    "fieldtype": "Date",
    "label": "Start Date"
+  },
+  {
+   "fieldname": "section_break_rklsa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_vfd_grouped",
+   "fieldtype": "Check",
+   "label": "Is VFD Grouped"
   }
  ],
  "links": [],
- "modified": "2024-03-28 16:39:09.197685",
+ "modified": "2024-04-01 21:21:50.595516",
  "modified_by": "Administrator",
  "module": "VFD Providers",
  "name": "Total VFD Setting",
