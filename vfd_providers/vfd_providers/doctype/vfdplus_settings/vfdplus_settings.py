@@ -244,7 +244,6 @@ def post_fiscal_receipt(doc):
     doc.vfd_time = data["msg_data"].get("itime")
     doc.vfd_status = "Success"
     doc.vfd_verification_url = f"https://verify.tra.go.tz/{doc.vfd_rctvnum}_{str(data['msg_data'].get('itime')).replace(':','')}"
-    doc.save()
 
     vfd_provider_posting_doc.sales_invoice = doc.name
     vfd_provider_posting_doc.rctnum = doc.vfd_rctvnum
@@ -252,7 +251,9 @@ def post_fiscal_receipt(doc):
     vfd_provider_posting_doc.time = doc.vfd_time
     vfd_provider_posting_doc.save()
 
-    frappe.db.commit()
+    if not doc.is_auto_generate_vfd:
+        doc.save()
+        frappe.db.commit()
     return data
 
 
