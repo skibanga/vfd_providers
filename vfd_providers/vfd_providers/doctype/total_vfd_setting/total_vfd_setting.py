@@ -88,6 +88,7 @@ def post_fiscal_receipt(doc):
     vfd_cust_id_type = doc.vfd_cust_id_type[:1] or "6"
     payload = {
         "serial": total_vfd_setting.serial_id,
+        "referenceNumber": doc.name,
         "customer": {
             "name": doc.customer_name,
             "idType": vfd_cust_id_type,
