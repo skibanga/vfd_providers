@@ -18,7 +18,7 @@
   "x_active_business",
   "start_date",
   "section_break_rklsa",
-  "is_vfd_grouped"
+  "is_vat_grouped"
  ],
  "fields": [
   {
@@ -81,13 +81,13 @@
   },
   {
    "default": "0",
-   "fieldname": "is_vfd_grouped",
+   "fieldname": "is_vat_grouped",
    "fieldtype": "Check",
-   "label": "Is VFD Grouped"
+   "label": "Is VAT Grouped"
   }
  ],
  "links": [],
- "modified": "2024-04-01 21:21:50.595516",
+ "modified": "2024-04-02 12:34:47.560984",
  "modified_by": "Administrator",
  "module": "VFD Providers",
  "name": "Total VFD Setting",
