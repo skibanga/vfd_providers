@@ -1,5 +1,5 @@
 frappe.ui.form.on("Sales Invoice", {
-  refresh: function (frm) { },
+  refresh: function (frm) {},
   generate_vfd: (frm) => {
     if (!frm.doc.vfd_cust_id) {
       frappe.msgprint({
@@ -8,7 +8,8 @@ frappe.ui.form.on("Sales Invoice", {
         primary_action: {
           label: "Proceed",
           action(values) {
-            generate_vfd(frm);
+            _generate_vfd(frm);
+            cur_dialog.cancel();
           },
         },
       });
@@ -19,17 +20,18 @@ frappe.ui.form.on("Sales Invoice", {
         primary_action: {
           label: "Proceed",
           action(values) {
-            generate_vfd(frm);
+            _generate_vfd(frm);
+            cur_dialog.cancel();
           },
         },
       });
     } else {
-      generate_vfd(frm);
+      _generate_vfd(frm);
     }
   },
 });
 
-function generate_vfd(frm) {
+function _generate_vfd(frm) {
   frappe.dom.freeze(__("Generating VFD..."));
   frappe
     .call("vfd_providers.utils.utils.generate_tra_vfd", {
@@ -37,6 +39,11 @@ function generate_vfd(frm) {
     })
     .then((r) => {
       frappe.dom.unfreeze();
+      frm.reload_doc();
+      frappe.show_alert({
+        message: __("VFD Generated"),
+        indicator: "green",
+      });
     })
     .fail((r) => {
       frappe.msgprint(__("Error generating VFD"));
