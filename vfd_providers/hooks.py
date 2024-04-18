@@ -120,6 +120,9 @@ doc_events = {
         "before_cancel": "vfd_providers.utils.sales_invoice.validate_cancel",
         "before_submit": "vfd_providers.utils.sales_invoice.vfd_validation",
     },
+    "Customer": {
+        "validate": "vfd_providers.utils.utils.clean_and_update_tax_id_info",
+    },
 }
 
 # Scheduled Tasks
