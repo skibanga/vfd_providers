@@ -13,12 +13,14 @@ class TotalVFDSetting(Document):
     pass
 
 
-def post_fiscal_receipt(doc):
+def post_fiscal_receipt(doc, method="POST"):
     """Post fiscal receipt to Total VFD
     Parameters
     ----------
     doc : object
     Python object which is expected to be from Sales Invoice doctype.
+    method : str
+    Method name which is calling this function. e.g. POST, validate, on_update, etc.
 
     Returns
     -------
@@ -47,7 +49,7 @@ def post_fiscal_receipt(doc):
             else:
                 price = flt(item.base_amount, precision=2)
         else:
-            price = item.base_amount
+            price = flt(item.base_amount, precision=2)
         # Check if the VAT group already exists in the dictionary; if not, initialize it
         if vat_group not in vat_group_totals:
             vat_group_totals[vat_group] = 0
@@ -78,7 +80,7 @@ def post_fiscal_receipt(doc):
                 {
                     "id": f"""Items in VAT Group {vat_group_entry["vat_group"]}""",
                     "name": f"""Items in VAT Group {vat_group_entry["vat_group"]}""",
-                    "price": vat_group_entry["total_price"],
+                    "price": flt(vat_group_entry["total_price"], precision=2),
                     "qty": 1,
                     "vatGroup": vat_group_entry["vat_group"],
                     "discount": 0.0,
@@ -116,13 +118,6 @@ def post_fiscal_receipt(doc):
         vfd_provider_posting_doc=vfd_provider_posting_doc,
     )
 
-    doc.vfd_rctvnum = data.get("rctvnum")
-    doc.vfd_date = data.get("localDate")
-    doc.vfd_time = data.get("localTime")
-    doc.vfd_status = "Success"
-    doc.vfd_verification_url = data.get("verificationLink")
-    doc.save()
-
     vfd_provider_posting_doc.sales_invoice = doc.name
     vfd_provider_posting_doc.rctnum = doc.vfd_rctvnum
     vfd_provider_posting_doc.date = doc.vfd_date
@@ -130,7 +125,29 @@ def post_fiscal_receipt(doc):
     vfd_provider_posting_doc.ackmsg = str(data)
     vfd_provider_posting_doc.save()
 
-    if not doc.is_auto_generate_vfd:
+    if method == "on_submit":
+        doc.vfd_status = "Success"
+        doc.vfd_verification_url = data.get("verificationLink")
+        doc.vfd_rctvnum = data.get("rctvnum")
+        doc.vfd_date = data.get("localDate")
+        doc.vfd_time = data.get("localTime")
+    elif method == "POST":
+        frappe.db.set_value(
+            "Sales Invoice", doc.name, "vfd_rctvnum", data.get("rctvnum")
+        )
+        frappe.db.set_value("Sales Invoice", doc.name, "vfd_status", "Success")
+        frappe.db.set_value(
+            "Sales Invoice", doc.name, "vfd_date", data.get("localDate")
+        )
+        frappe.db.set_value(
+            "Sales Invoice", doc.name, "vfd_time", data.get("localTime")
+        )
+        frappe.db.set_value(
+            "Sales Invoice",
+            doc.name,
+            "vfd_verification_url",
+            data.get("verificationLink"),
+        )
         frappe.db.commit()
     return data
 
