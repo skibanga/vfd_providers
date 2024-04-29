@@ -37,7 +37,7 @@ def autogenerate_vfd(doc, method):
     if doc.is_not_vfd_invoice or doc.vfd_status == "Sent":
         return
     if doc.is_auto_generate_vfd and doc.docstatus == 1:
-        generate_tra_vfd(docname=doc.name, sinv_doc=doc)
+        generate_tra_vfd(docname=doc.name, sinv_doc=doc, method=method)
 
 
 def clean_and_update_tax_id_info(doc, method):
@@ -49,4 +49,3 @@ def clean_and_update_tax_id_info(doc, method):
     else:
         doc.vfd_cust_id_type = "6- Other"
         doc.vfd_cust_id = "999999999"
-        generate_tra_vfd(docname=doc.name, sinv_doc=doc, method=method)
