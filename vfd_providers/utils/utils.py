@@ -4,7 +4,7 @@ from frappe import _
 
 
 @frappe.whitelist()
-def generate_tra_vfd(docname, sinv_doc=None):
+def generate_tra_vfd(docname, sinv_doc=None, method="POST"):
     if not sinv_doc:
         sinv_doc = frappe.get_doc("Sales Invoice", docname)
     if sinv_doc.is_not_vfd_invoice or sinv_doc.vfd_status in ["Sent", "Success"]:
@@ -23,15 +23,14 @@ def generate_tra_vfd(docname, sinv_doc=None):
         from vfd_providers.vfd_providers.doctype.vfdplus_settings.vfdplus_settings import (
             post_fiscal_receipt,
         )
-
-        post_fiscal_receipt(sinv_doc)
-
     elif vfd_provider.name == "TotalVFD":
         from vfd_providers.vfd_providers.doctype.total_vfd_setting.total_vfd_setting import (
             post_fiscal_receipt,
         )
+    else:
+        frappe.throw(_("VFD Provider not supported"))
 
-        post_fiscal_receipt(sinv_doc)
+    post_fiscal_receipt(sinv_doc, method)
 
 
 def autogenerate_vfd(doc, method):
@@ -50,3 +49,4 @@ def clean_and_update_tax_id_info(doc, method):
     else:
         doc.vfd_cust_id_type = "6- Other"
         doc.vfd_cust_id = "999999999"
+        generate_tra_vfd(docname=doc.name, sinv_doc=doc, method=method)

@@ -145,12 +145,14 @@ def send_vfdplus_request(
     return data
 
 
-def post_fiscal_receipt(doc):
+def post_fiscal_receipt(doc, method="POST"):
     """Post fiscal receipt to VFDPlus
     Parameters
     ----------
     doc : object
     Python object which is expected to be from VFDPlus Settings doctype.
+    method : str
+    Method name which is calling this function. e.g. POST, validate, on_update, etc.
 
     Returns
     -------
