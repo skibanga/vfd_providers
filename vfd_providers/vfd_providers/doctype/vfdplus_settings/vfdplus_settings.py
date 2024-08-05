@@ -201,8 +201,8 @@ def post_fiscal_receipt(doc, method="POST"):
         "itime": format_datetime(str(doc.vfd_time), "HH:mm:ss"),
         "customer_info": {
             "cust_name": doc.customer_name,
-            "cust_id_type": doc.vfd_cust_id_type or "6",
-            "cust_id": doc.vfd_cust_id or "NIL",
+            "cust_id_type": doc.vfd_custidtype or "6",
+            "cust_id": doc.vfd_custid or "NIL",
             "cust_phone": "",
             "cust_vrn": "",
             "cust_addr": "",

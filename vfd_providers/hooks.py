@@ -68,8 +68,13 @@ doctype_js = {
 # Installation
 # ------------
 
-# before_install = "vfd_providers.install.before_install"
-# after_install = "vfd_providers.install.after_install"
+before_migrate = [
+    "vfd_providers.patches.delete_existing_patch_log.delete",
+]
+
+after_migrate = [
+    "vfd_providers.patches.move_existing_data_to_new_field.migrate_data",
+]
 
 # Uninstallation
 # ------------

@@ -1,15 +1,15 @@
 frappe.ui.form.on("Customer", {
-    vfd_cust_id_type: function (frm) {
-        if (frm.doc.vfd_cust_id_type == "1- TIN") {
+    vfd_custidtype: function (frm) {
+        if (frm.doc.vfd_custidtype == "1- TIN") {
             let tax_id = frm.doc.tax_id;
-            let vfd_cust_id = tax_id.split('-').join('');
-            frm.set_value("vfd_cust_id", vfd_cust_id)
+            let vfd_custid = tax_id.split('-').join('');
+            frm.set_value("vfd_custid", vfd_custid)
         }
     },
-    vfd_cust_id: function (frm) {
-        // frappe.msgprint(string(frm.doc.vfd_cust_id.length))
-        // frappe.msgprint(frm.doc.vfd_cust_id_type.startsWith('1'))
-        if (frm.doc.tax_id.length != 9 && frm.doc.vfd_cust_id_type.startsWith('1')) {
+    vfd_custid: function (frm) {
+        // frappe.msgprint(string(frm.doc.vfd_custid.length))
+        // frappe.msgprint(frm.doc.vfd_custidtype.startsWith('1'))
+        if (frm.doc.tax_id.length != 9 && frm.doc.vfd_custidtype.startsWith('1')) {
             frappe.throw(__("TIN Number is should be 9 numbers only, Please remove the dashes"));
         }
     },
@@ -20,9 +20,9 @@ frappe.ui.form.on("Customer", {
             }
             if (frm.doc.tax_id) {
                 let tax_id = frm.doc.tax_id;
-                let vfd_cust_id = tax_id.split('-').join('');
-                frm.set_value("vfd_cust_id", vfd_cust_id);
-                frm.set_value("vfd_cust_id_type", "1- TIN");
+                let vfd_custid = tax_id.split('-').join('');
+                frm.set_value("vfd_custid", vfd_custid);
+                frm.set_value("vfd_custidtype", "1- TIN");
             }
         });
     },

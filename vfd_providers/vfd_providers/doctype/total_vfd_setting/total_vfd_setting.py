@@ -87,14 +87,14 @@ def post_fiscal_receipt(doc, method="POST"):
                 }
             )
 
-    vfd_cust_id_type = doc.vfd_cust_id_type[:1] or "6"
+    vfd_custidtype = doc.vfd_custidtype[:1] or "6"
     payload = {
         "serial": total_vfd_setting.serial_id,
         "referenceNumber": doc.name,
         "customer": {
             "name": doc.customer_name,
-            "idType": vfd_cust_id_type,
-            "idValue": doc.vfd_cust_id if vfd_cust_id_type != "6" else "",
+            "idType": vfd_custidtype,
+            "idValue": doc.vfd_custid if vfd_custidtype != "6" else "",
             "mobile": "",
         },
         "payments": [

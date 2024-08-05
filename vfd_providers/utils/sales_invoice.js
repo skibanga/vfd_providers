@@ -1,7 +1,7 @@
 frappe.ui.form.on("Sales Invoice", {
   refresh: function (frm) {},
   generate_vfd: (frm) => {
-    if (!frm.doc.vfd_cust_id) {
+    if (!frm.doc.vfd_custid) {
       frappe.msgprint({
         title: __("Confirmation Required"),
         message: __("Are you sure you want to send VFD without TIN"),
@@ -13,7 +13,7 @@ frappe.ui.form.on("Sales Invoice", {
           },
         },
       });
-    } else if (frm.doc.vfd_cust_id && frm.doc.vfd_cust_id != frm.doc.tax_id) {
+    } else if (frm.doc.vfd_custid && frm.doc.vfd_custid != frm.doc.tax_id) {
       frappe.msgprint({
         title: __("Confirmation Required"),
         message: __("TIN an VFD Customer ID mismatch"),
